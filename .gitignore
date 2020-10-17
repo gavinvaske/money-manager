@@ -4,3 +4,5 @@
 .idea/*
 __pycache__/
 *.py[cod]
+moneymanager/data/input_files/*
+moneymanager/data/output_files/*
