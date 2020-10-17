@@ -50,7 +50,7 @@ class CsvManager:
 
         for group_name, df_group in csv_grouped:
             df_group = df_group.drop(columns=[col_month_year])
-            file_path = path.join(directory, str(group_name))
+            file_path = path.join(directory, str(group_name) + '.csv')
             df_group.to_csv(file_path, index=None)
 
 
