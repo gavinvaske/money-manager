@@ -21,7 +21,12 @@ if __name__ == '__main__':
     transactions = CsvManager.merge_csv_files(input_directory, dtypes)
     transactions['DATE'] = pd.to_datetime(transactions['DATE'])
     transactions = transactions.sort_values(by=['DATE'])
-    transactions.to_csv(os.path.join(output_directory, 'transactions.csv'), index=None)
+
+    start_date = CsvManager.get_start_of_data(transactions).strftime("%m-%d-%Y")
+    end_date = CsvManager.get_end_of_data(transactions).strftime("%m-%d-%Y")
+    file_name = 'transactions' + '_' + start_date + '_' + end_date + '.csv'
+    transactions.to_csv(os.path.join(output_directory, file_name), index=None)
+
 
     if GENERATE_MONTHLY_REPORT:
         CsvManager.generate_monthly_spending_reports(transactions, output_directory)

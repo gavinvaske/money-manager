@@ -15,6 +15,11 @@ class CsvManager:
             csv = pd.read_csv(file_path)
             csv = CsvManager.convert_column_names(csv)
             csv = CsvManager.add_source_column(csv, re.sub('\.csv$', '', file_name))
+            column_category = 'CATEGORY'
+
+            if column_category not in csv:
+                csv['CATEGORY'] = 'UNCATEGORIZED'
+
             csv['CATEGORY'] = csv['CATEGORY'].fillna('UNCATEGORIZED').str.upper().str.strip()
             csv.to_csv(file_path, index=None)
 
@@ -83,6 +88,14 @@ class CsvManager:
             spending = round(group['AMOUNT'].sum(), 2)
             spending_by_category[group_name] = spending
         return spending_by_category
+
+    @staticmethod
+    def get_start_of_data(transactions):
+        return transactions['DATE'].iloc[0]
+
+    @staticmethod
+    def get_end_of_data(transactions):
+        return transactions['DATE'].iloc[-1]
 
 
 
