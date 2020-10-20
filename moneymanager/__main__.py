@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 from moneymanager.services.CsvManager import CsvManager
+from moneymanager.models.Plot import Plot
 
 IMPORT_TRANSACTIONS = True
 IMPORT_FROM_MULTIPLE_SOURCES = not IMPORT_TRANSACTIONS
