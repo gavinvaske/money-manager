@@ -37,7 +37,6 @@ class CsvManager:
             csv[src_col_name] = file_name
         return csv
 
-
     @staticmethod
     def merge_csv_files(directory, dtypes):
         file_names = glob.glob(directory + '/*.csv')

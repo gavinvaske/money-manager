@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from moneymanager.services.CsvManager import CsvManager
-from moneymanager.models.Plot import Plot
+from moneymanager.services.PlotManager import PlotManager
 
 IMPORT_TRANSACTIONS = True
 IMPORT_FROM_MULTIPLE_SOURCES = not IMPORT_TRANSACTIONS
@@ -31,6 +31,7 @@ if __name__ == '__main__':
 
     if GENERATE_MONTHLY_REPORT:
         CsvManager.generate_monthly_spending_reports(transactions, output_directory)
+        PlotManager.generate_monthly_spending_graphs(output_directory)
 
 
 

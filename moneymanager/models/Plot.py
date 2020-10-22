@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from os import path
 
 class Plot:
+
     def __init__(self, x, y, xlabel, ylabel, title):
         self.x = x
         self.y = y
