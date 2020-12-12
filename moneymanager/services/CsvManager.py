@@ -7,7 +7,11 @@ import re
 
 class CsvManager:
     @staticmethod
-    def preprocess_csv_files(directory):
+    def validate_columns(csv_columns, expected_csv_columns):
+        return True
+
+    @staticmethod
+    def get_transaction_data(directory, dtypes):
         files_names = [f for f in os.listdir(directory) if path.isfile(path.join(directory, f))]
 
         for file_name in files_names:
@@ -15,13 +19,13 @@ class CsvManager:
             csv = pd.read_csv(file_path)
             csv = CsvManager.convert_column_names(csv)
             csv = CsvManager.add_source_column(csv, re.sub('\.csv$', '', file_name))
-            column_category = 'CATEGORY'
+            column_category = os.getenv("CATEGORY_COLUMN")
 
             if column_category not in csv:
-                csv['CATEGORY'] = 'UNCATEGORIZED'
+                csv[column_category] = 'UNCATEGORIZED'
 
-            csv['CATEGORY'] = csv['CATEGORY'].fillna('UNCATEGORIZED').str.upper().str.strip()
-            csv.to_csv(file_path, index=None)
+            csv[column_category] = csv[column_category].fillna('UNCATEGORIZED').str.upper().str.strip()
+        return CsvManager.merge_csv_files(directory, dtypes)
 
     @staticmethod
     def convert_column_names(csv, to_upper=True):
@@ -32,9 +36,11 @@ class CsvManager:
         return csv
 
     @staticmethod
-    def add_source_column(csv, file_name, src_col_name='SOURCE'):
-        if src_col_name not in csv:
-            csv[src_col_name] = file_name
+    def add_source_column(csv, file_name):
+        source_column = os.getenv("SOURCE_COLUMN")
+
+        if source_column not in csv:
+            csv[source_column] = file_name
         return csv
 
     @staticmethod
@@ -51,19 +57,18 @@ class CsvManager:
         return pd.concat(dataframes, axis=0, ignore_index=True)
 
     @staticmethod
-    def generate_monthly_spending_reports(csv, directory, date_col_name='DATE', frequency='M'):
+    def generate_monthly_spending_reports(csv, directory, frequency='M'):
         """
         :param csv: pandas dataframe holding transactional data
         :param directory: path to folder that will hold the generated files
         :param frequency: a panda offset string (see https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases)
-        :param date_col_name: name of the date column within the csv param
         :return: None
         """
         period = 'period'
-        csv[period] = csv[date_col_name].dt.to_period(frequency)
+        csv[period] = csv[os.getenv("DATE_COLUMN")].dt.to_period(frequency)
         csv_grouped = csv.groupby(period)
         spending_by_category_list = []
-        unique_categories = csv['CATEGORY'].unique()
+        unique_categories = csv[os.getenv("CATEGORY_COLUMN")].unique()
 
         for group_name, group in csv_grouped:
             spending_dict = CsvManager.compute_spending_by_category(group, unique_categories)
@@ -84,20 +89,20 @@ class CsvManager:
         for category in expense_categories:
             spending_by_category[category] = 0
 
-        grouped_transactions = transactions.groupby('CATEGORY')
+        grouped_transactions = transactions.groupby(os.getenv("CATEGORY_COLUMN"))
 
         for group_name, group in grouped_transactions:
-            spending = round(group['AMOUNT'].sum(), 2)
+            spending = round(group[os.getenv("AMOUNT_COLUMN")].sum(), 2)
             spending_by_category[group_name] = spending
         return spending_by_category
 
     @staticmethod
     def get_start_of_data(transactions):
-        return transactions['DATE'].iloc[0]
+        return transactions[os.getenv("DATE_COLUMN")].iloc[0]
 
     @staticmethod
     def get_end_of_data(transactions):
-        return transactions['DATE'].iloc[-1]
+        return transactions[os.getenv("DATE_COLUMN")].iloc[-1]
 
 
 

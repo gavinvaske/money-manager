@@ -23,10 +23,9 @@ if __name__ == '__main__':
                 category_column: 'object',
                 source_column: 'object'
     }
-    CsvManager.preprocess_csv_files(input_directory)
-    transactions = CsvManager.merge_csv_files(input_directory, dtypes)
+    transactions = CsvManager.get_transaction_data(input_directory, dtypes)
 
-    if (len(transactions) == 0):
+    if len(transactions) == 0:
         raise RuntimeError('No transactions found.')
 
     transactions[date_column] = pd.to_datetime(transactions[date_column])
