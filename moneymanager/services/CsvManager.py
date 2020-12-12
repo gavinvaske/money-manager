@@ -45,6 +45,9 @@ class CsvManager:
         for file_name in file_names:
             csv = pd.read_csv(file_name, dtype=dtypes)
             dataframes.append(csv)
+
+        if (len(dataframes) == 0):
+            return []
         return pd.concat(dataframes, axis=0, ignore_index=True)
 
     @staticmethod
