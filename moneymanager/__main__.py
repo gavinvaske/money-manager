@@ -9,13 +9,11 @@ if __name__ == '__main__':
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
     input_directory = os.path.join(ROOT_DIR, os.getenv("INPUT_DIRECTORY"))
     output_directory = os.path.join(ROOT_DIR, os.getenv("OUTPUT_DIRECTORY"))
-
     date_column = os.getenv("DATE_COLUMN")
-    description_column= os.getenv("DESCRIPTION_COLUMN")
+    description_column = os.getenv("DESCRIPTION_COLUMN")
     amount_column = os.getenv("AMOUNT_COLUMN")
     category_column = os.getenv("CATEGORY_COLUMN")
     source_column = os.getenv("SOURCE_COLUMN")
-
     dtypes = {
                 date_column: 'object',
                 description_column: 'object',
@@ -23,10 +21,11 @@ if __name__ == '__main__':
                 category_column: 'object',
                 source_column: 'object'
     }
-    transactions = CsvManager.get_transaction_data(input_directory, dtypes)
 
-    if len(transactions) == 0:
-        raise RuntimeError('No transactions found.')
+    CsvManager.validate_data(input_directory, [
+        date_column, description_column, amount_column, category_column
+    ])
+    transactions = CsvManager.get_transaction_data(input_directory, dtypes)
 
     transactions[date_column] = pd.to_datetime(transactions[date_column])
     transactions = transactions.sort_values(by=[date_column])
