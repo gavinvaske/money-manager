@@ -7,12 +7,27 @@ import re
 
 class CsvManager:
     @staticmethod
-    def validate_columns(csv_columns, expected_csv_columns):
-        return True
+    def validate_data(directory, expected_csv_columns):
+        files_names = [f for f in os.listdir(directory) if path.isfile(path.join(directory, f))]
+        expected_csv_columns = [x.upper() for x in expected_csv_columns]
+
+        for file_name in files_names:
+            file_path = path.join(directory, file_name)
+            csv = pd.read_csv(file_path)
+
+            if len(csv) == 0:
+                raise RuntimeError("{} is empty".format(file_name))
+
+            column_names = [x.upper() for x in csv.columns]
+
+            for column in expected_csv_columns:
+                if column not in column_names:
+                    raise RuntimeError("Column {} was not found in {}".format(column, file_name))
 
     @staticmethod
     def get_transaction_data(directory, dtypes):
         files_names = [f for f in os.listdir(directory) if path.isfile(path.join(directory, f))]
+        csv_files = []
 
         for file_name in files_names:
             file_path = path.join(directory, file_name)
@@ -25,7 +40,8 @@ class CsvManager:
                 csv[column_category] = 'UNCATEGORIZED'
 
             csv[column_category] = csv[column_category].fillna('UNCATEGORIZED').str.upper().str.strip()
-        return CsvManager.merge_csv_files(directory, dtypes)
+            csv_files.append(csv)
+        return CsvManager.merge_csv_files(csv_files, dtypes)
 
     @staticmethod
     def convert_column_names(csv, to_upper=True):
@@ -44,14 +60,7 @@ class CsvManager:
         return csv
 
     @staticmethod
-    def merge_csv_files(directory, dtypes):
-        file_names = glob.glob(directory + '/*.csv')
-        dataframes = []
-
-        for file_name in file_names:
-            csv = pd.read_csv(file_name, dtype=dtypes)
-            dataframes.append(csv)
-
+    def merge_csv_files(dataframes, dtypes):
         if (len(dataframes) == 0):
             return []
         return pd.concat(dataframes, axis=0, ignore_index=True)
